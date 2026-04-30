@@ -13,9 +13,7 @@ namespace TASKFLOWAPI.Models
 
             public string PasswordHash { get; set; }
 
-            public Role Role { get; set; }
-
-            public List<Project> Projects { get; set; }
+            public Role UserRole { get; set; }
 
             public enum Role
             {

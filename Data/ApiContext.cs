@@ -3,10 +3,9 @@ using TASKFLOWAPI.Models;
 
 namespace TASKFLOWAPI.Data
 {
-
-    public class AppDbContext : DbContext
+    public class ApiContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options)
+        public ApiContext(DbContextOptions<ApiContext> options)
             : base(options)
         {
         }
@@ -18,9 +17,8 @@ namespace TASKFLOWAPI.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<User>()
-                .Property(u => u.Role)
+                .Property(u => u.UserRole)
                 .HasConversion<string>();
         }
-    }
-    
+    }    
 }
