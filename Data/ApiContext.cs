@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using TASKFLOWAPI.Models;
+using TaskFLowAPI.Models;
 
-namespace TASKFLOWAPI.Data
+namespace TaskFLowAPI.Data
 {
     public class ApiContext : DbContext
     {
