@@ -20,5 +20,7 @@ namespace TaskFlowAPI.Models
                 Admin,
                 User
             }
-        }
+        public ICollection<Project> Projects { get; set; }
+            = new List<Project>();
+    }
 }
