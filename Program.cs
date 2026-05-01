@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using TASKFLOWAPI.Data;
+using TaskFlowAPI.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace TASKFLOWAPI.Models
+namespace TaskFlowAPI.Models
 {
         public class User
         {

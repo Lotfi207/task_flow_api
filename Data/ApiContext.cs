@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using TASKFLOWAPI.Models;
+using TaskFlowAPI.Models;
 
-namespace TASKFLOWAPI.Data
+namespace TaskFlowAPI.Data
 {
     public class ApiContext : DbContext
     {
@@ -11,6 +11,8 @@ namespace TASKFLOWAPI.Data
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Project> Projects { get; set; }
+        public DbSet<TaskItem> Tasks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
