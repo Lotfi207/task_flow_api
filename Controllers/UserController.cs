@@ -1,60 +1,36 @@
-﻿using System.Net.Http.Headers;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TaskFlowAPI.Data;
-using TaskFlowAPI.Models;
+﻿using Microsoft.AspNetCore.Mvc;
 using TaskFlowAPI.DTOs;
-
-using static TaskFlowAPI.Models.User;
+using TaskFlowAPI.Services;
 
 namespace TaskFlowAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class UserController : Controller
+    public class UserController : ControllerBase
     {
-        private readonly ApiContext _context;
+        private readonly IUserService _userService;
 
-        public UserController(ApiContext context)
+        public UserController(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
+
         [HttpGet]
         public async Task<ActionResult<List<UserResponseDto>>> Index()
         {
-            var users = await _context.Users
-                .Select(u => new UserResponseDto
-                {
-                    Id = u.Id,
-                    Name = u.Name,
-                    Email = u.Email,
-                    Role = u.UserRole.ToString()
-                })
-                .ToListAsync();
-
+            var users = await _userService.GetAllAsync();
             return Ok(users);
         }
 
-
-        // GET: UserController/Details/5
         [HttpGet("{id}")]
         public async Task<ActionResult<UserResponseDto>> Details(int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _userService.GetByIdAsync(id);
 
             if (user == null)
                 return NotFound();
 
-            var response = new UserResponseDto
-            {
-                Id = user.Id,
-                Name = user.Name,
-                Email = user.Email,
-                Role = user.UserRole.ToString()
-            };
-
-            return Ok(response);
+            return Ok(user);
         }
 
         [HttpPost]
@@ -63,28 +39,9 @@ namespace TaskFlowAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = new User
-            {
-                Name = dto.Name,
-                Email = dto.Email,
-                PasswordHash = dto.Password,
-                UserRole = Role.User
-            };
+            var user = await _userService.CreateAsync(dto);
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            var response = new UserResponseDto
-            {
-                Id = user.Id,
-                Name = user.Name,
-                Email = user.Email,
-                Role = user.UserRole.ToString()
-            };
-
-            return CreatedAtAction(nameof(Details), new { id = user.Id }, response);
+            return CreatedAtAction(nameof(Details), new { id = user.Id }, user);
         }
-
-
     }
 }
