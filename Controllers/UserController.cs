@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskFlowAPI.Data;
 using TaskFlowAPI.Models;
+using TaskFlowAPI.DTOs;
 
 using static TaskFlowAPI.Models.User;
 
@@ -19,41 +20,71 @@ namespace TaskFlowAPI.Controllers
         {
             _context = context;
         }
-        // GET: UserController
-        public async Task<ActionResult<List<User>>> Index()
+        [HttpGet]
+        public async Task<ActionResult<List<UserResponseDto>>> Index()
         {
-            List<User> users = await _context.Users.ToListAsync();
+            var users = await _context.Users
+                .Select(u => new UserResponseDto
+                {
+                    Id = u.Id,
+                    Name = u.Name,
+                    Email = u.Email,
+                    Role = u.UserRole.ToString()
+                })
+                .ToListAsync();
+
             return Ok(users);
         }
 
 
         // GET: UserController/Details/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> Details(int id)
+        public async Task<ActionResult<UserResponseDto>> Details(int id)
         {
-            User? user = await _context.Users.FindAsync(id);
+            var user = await _context.Users.FindAsync(id);
+
             if (user == null)
-            {
                 return NotFound();
-            }
-            return Ok(user);
+
+            var response = new UserResponseDto
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                Role = user.UserRole.ToString()
+            };
+
+            return Ok(response);
         }
 
-        // POST: UserController/Create
         [HttpPost]
-        public async Task<ActionResult<User>> Create(User user)
+        public async Task<ActionResult<UserResponseDto>> Create(UserCreateDto dto)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
+
+            var user = new User
+            {
+                Name = dto.Name,
+                Email = dto.Email,
+                PasswordHash = dto.Password,
+                UserRole = Role.User
+            };
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(Details), new { id = user.Id }, user);
+            var response = new UserResponseDto
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                Role = user.UserRole.ToString()
+            };
+
+            return CreatedAtAction(nameof(Details), new { id = user.Id }, response);
         }
 
-        
+
     }
 }
