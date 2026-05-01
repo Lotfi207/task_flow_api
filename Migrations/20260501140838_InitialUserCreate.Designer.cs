@@ -4,14 +4,14 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TASKFLOWAPI.Data;
+using TaskFLowAPI.Data;
 
 #nullable disable
 
 namespace TaskFlowAPI.Migrations
 {
     [DbContext(typeof(ApiContext))]
-    [Migration("20260430134232_InitialUserCreate")]
+    [Migration("20260501140838_InitialUserCreate")]
     partial class InitialUserCreate
     {
         /// <inheritdoc />
@@ -24,7 +24,7 @@ namespace TaskFlowAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("TASKFLOWAPI.Models.User", b =>
+            modelBuilder.Entity("TaskFLowAPI.Models.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
