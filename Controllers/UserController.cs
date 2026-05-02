@@ -1,12 +1,15 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TaskFlowAPI.Data;
 using TaskFlowAPI.DTOs;
 using TaskFlowAPI.Helpers;
 using TaskFlowAPI.Models;
 using TaskFLowAPI.Data;
 using static TaskFlowAPI.Models.User;
+
 
 namespace TaskFlowAPI.Controllers
 {
@@ -16,11 +19,13 @@ namespace TaskFlowAPI.Controllers
 
     {
         private readonly ApiContext _context;
+        private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IConfiguration _configuration;
 
-        public UserController(ApiContext context, IConfiguration configuration)
+        public UserController(ApiContext context, IPasswordHasher<User> passwordHasher, IConfiguration configuration)
         {
             _context = context;
+            _passwordHasher = passwordHasher;
             _configuration = configuration;
         }
 
@@ -32,23 +37,18 @@ namespace TaskFlowAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Check email exists
-            var existingUser = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == dto.Email);
-
-            if (existingUser != null)
+            if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
                 return BadRequest("Email already exists");
 
-            // Hash password
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
-
-            // Create user
             var user = new User
             {
                 Name = dto.Name,
                 Email = dto.Email,
                 UserRole = dto.Role
             };
+
+            // Hash password
+            user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -74,11 +74,17 @@ namespace TaskFlowAPI.Controllers
             if (user == null)
                 return Unauthorized("Invalid credentials");
 
-            var isValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
+            // Verify password
+            var result = _passwordHasher.VerifyHashedPassword(
+                user,
+                user.PasswordHash,
+                dto.Password
+            );
 
-            if (!isValid)
+            if (result == PasswordVerificationResult.Failed)
                 return Unauthorized("Invalid credentials");
 
+            // Create claims
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
