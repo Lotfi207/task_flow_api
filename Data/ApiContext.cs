@@ -2,7 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using TaskFlowAPI.Models;
 using System.Text.Json;
 
-namespace TaskFlowAPI.Data
+
+namespace TaskFLowAPI.Data
 {
     public class ApiContext : DbContext
     {
