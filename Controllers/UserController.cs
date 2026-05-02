@@ -7,8 +7,6 @@ using TaskFlowAPI.Data;
 using TaskFlowAPI.DTOs;
 using TaskFlowAPI.Helpers;
 using TaskFlowAPI.Models;
-using TaskFLowAPI.Data;
-using static TaskFlowAPI.Models.User;
 
 
 namespace TaskFlowAPI.Controllers
@@ -30,7 +28,7 @@ namespace TaskFlowAPI.Controllers
         }
 
         // auth operations : register and login 
-             //register
+        //register
         [HttpPost("register")]
         public async Task<ActionResult<UserResponseDto>> Register(UserCreateDto dto)
         {
