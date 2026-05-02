@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TaskFlowAPI.Models;
+using System.Text.Json;
 
 namespace TaskFlowAPI.Data
 {
@@ -34,7 +35,11 @@ namespace TaskFlowAPI.Data
               .HasForeignKey(t => t.ProjectId)
               .OnDelete(DeleteBehavior.Cascade);
 
-
+            modelBuilder.Entity<TaskItem>()
+           .Property(t => t.Comments)
+           .HasConversion(
+            v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+            v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null));
         }
     }    
 }
