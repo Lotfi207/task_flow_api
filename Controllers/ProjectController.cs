@@ -1,13 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskFlowAPI.Data;
 using TaskFlowAPI.Models;
 
 namespace TaskFlowAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/projects")]
-    public class ProjectController : Controller
+    public class ProjectController : ControllerBase
     {
         private readonly ApiContext _context;
 
@@ -16,19 +19,31 @@ namespace TaskFlowAPI.Controllers
             _context = context;
         }
 
-        // GET: ProjectController
+        // GET: api/projects
         [HttpGet]
-        public async Task<ActionResult<List<Project>>> Index()
+        public async Task<ActionResult<List<Project>>> GetAll()
         {
-            List<Project> projects = await _context.Projects.ToListAsync();
+            var userId = int.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            );
+
+            var projects = await _context.Projects
+                .Where(p => p.UserId == userId)
+                .ToListAsync();
+
             return Ok(projects);
         }
 
-        // GET: ProjectController/Details/5
+        // GET: api/projects/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Project>> Details(int id)
+        public async Task<ActionResult<Project>> GetById(int id)
         {
-            Project? project = await _context.Projects.FindAsync(id);
+            var userId = int.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            );
+
+            var project = await _context.Projects
+                .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
 
             if (project == null)
             {
@@ -38,7 +53,7 @@ namespace TaskFlowAPI.Controllers
             return Ok(project);
         }
 
-        // POST: ProjectController/Create
+        // POST: api/projects
         [HttpPost]
         public async Task<ActionResult<Project>> Create(Project project)
         {
@@ -47,52 +62,58 @@ namespace TaskFlowAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            project.CreationDate = DateTime.Now;
+            var userId = int.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            );
+
+            project.UserId = userId;
+            project.CreationDate = DateTime.UtcNow;
 
             _context.Projects.Add(project);
+
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(Details), new { id = project.Id }, project);
+            return CreatedAtAction(
+                nameof(GetById),
+                new { id = project.Id },
+                project
+            );
         }
 
-        // PUT: ProjectController/Update/5
+        
         [HttpPut("{id}")]
-        public async Task<ActionResult<Project>> Update(int id, Project project)
+        public async Task<ActionResult> Update(int id, Project updatedProject)
         {
-            if (id != project.Id)
+            var userId = int.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            );
+
+            var project = await _context.Projects
+                .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+
+            if (project == null)
             {
-                return BadRequest("Id does not match");
+                return NotFound();
             }
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            project.Name = updatedProject.Name;
+            project.Description = updatedProject.Description;
 
-            _context.Entry(project).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                bool exists = await _context.Projects.AnyAsync(p => p.Id == id);
-                if (!exists)
-                {
-                    return NotFound();
-                }
-                throw;
-            }
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-
+        // DELETE: api/projects/5
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
-            Project? project = await _context.Projects.FindAsync(id);
+            var userId = int.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            );
+
+            var project = await _context.Projects
+                .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
 
             if (project == null)
             {
@@ -100,10 +121,10 @@ namespace TaskFlowAPI.Controllers
             }
 
             _context.Projects.Remove(project);
+
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
     }
 }
-
