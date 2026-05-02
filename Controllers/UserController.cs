@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskFlowAPI.Data;
@@ -10,6 +11,20 @@ namespace TaskFlowAPI.Controllers
     [ApiController]
     [Route("api/users")]
     public class UserController : ControllerBase
+=======
+﻿using System.Net.Http.Headers;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using TaskFLowAPI.Data;
+using TaskFLowAPI.Models;
+
+namespace TaskFLowAPI.Controllers
+{
+    [ApiController]
+    [Route("[controller]")]
+    public class UserController : Controller
+>>>>>>> dca66342fd571c4779676ca6b18eb7081b391d3e
     {
         private readonly ApiContext _context;
 
@@ -17,6 +32,7 @@ namespace TaskFlowAPI.Controllers
         {
             _context = context;
         }
+<<<<<<< HEAD
         // GET ALL USERS
         [HttpGet]
         public async Task<ActionResult<List<UserResponseDto>>> GetAll()
@@ -70,10 +86,42 @@ namespace TaskFlowAPI.Controllers
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                 UserRole = Role.User
             };
+=======
+        // GET: UserController
+        [HttpGet]
+        public async Task<ActionResult<List<User>>> Index()
+        {
+            List<User> users = await _context.Users.ToListAsync();
+            return Ok(users);
+        }
+
+
+        // GET: UserController/Details/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<User>> Details(int id)
+        {
+            User? user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return Ok(user);
+        }
+
+        // POST: UserController/Create
+        [HttpPost]
+        public async Task<ActionResult<User>> Create(User user)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+>>>>>>> dca66342fd571c4779676ca6b18eb7081b391d3e
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
+<<<<<<< HEAD
             var response = new UserResponseDto
             {
                 Id = user.Id,
@@ -142,3 +190,12 @@ namespace TaskFlowAPI.Controllers
 
     }
 }
+=======
+            return CreatedAtAction(nameof(Details), new { id = user.Id }, user);
+        }
+
+
+
+    }
+}
+>>>>>>> dca66342fd571c4779676ca6b18eb7081b391d3e

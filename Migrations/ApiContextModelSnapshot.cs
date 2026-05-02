@@ -4,7 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+<<<<<<< HEAD
 using TaskFlowAPI.Data;
+=======
+using TaskFLowAPI.Data;
+>>>>>>> dca66342fd571c4779676ca6b18eb7081b391d3e
 
 #nullable disable
 
@@ -22,6 +26,7 @@ namespace TaskFlowAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+<<<<<<< HEAD
             modelBuilder.Entity("TaskFlowAPI.Models.Project", b =>
                 {
                     b.Property<int>("Id")
@@ -79,6 +84,9 @@ namespace TaskFlowAPI.Migrations
                 });
 
             modelBuilder.Entity("TaskFlowAPI.Models.User", b =>
+=======
+            modelBuilder.Entity("TaskFLowAPI.Models.User", b =>
+>>>>>>> dca66342fd571c4779676ca6b18eb7081b391d3e
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()

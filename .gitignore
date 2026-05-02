@@ -5,8 +5,15 @@
 
 # dotenv files
 .env
+<<<<<<< HEAD
 #
 appsettings.Development.json
+=======
+
+#app settings 
+appsettings.Development.json
+
+>>>>>>> dca66342fd571c4779676ca6b18eb7081b391d3e
 # User-specific files
 *.rsuser
 *.suo
