@@ -1,8 +1,12 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> c2ce56e (add TaskItemController)
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskFlowAPI.Data;
 using TaskFlowAPI.Models;
+<<<<<<< HEAD
 
 namespace TaskFlowAPI.Controllers
 {
@@ -112,85 +116,116 @@ namespace TaskFlowAPI.Controllers
 =======
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+=======
+>>>>>>> c2ce56e (add TaskItemController)
 
 namespace TaskFlowAPI.Controllers
 {
-    public class TaskItemController : Controller
+    [ApiController]
+    [Route("api/tasks")]
+    public class TaskItemController : ControllerBase
     {
-        // GET: TaskItemController
-        public ActionResult Index()
+        private readonly ApiContext _context;
+
+        public TaskItemController(ApiContext context)
         {
-            return View();
+            _context = context;
         }
 
-        // GET: TaskItemController/Details/5
-        public ActionResult Details(int id)
+        [HttpGet]
+        public async Task<ActionResult<List<TaskItem>>> GetAll()
         {
-            return View();
+            List<TaskItem> tasks = await _context.Tasks.ToListAsync();
+
+            return Ok(tasks);
         }
 
-        // GET: TaskItemController/Create
-        public ActionResult Create()
+        
+        [HttpGet("{id}")]
+        public async Task<ActionResult<TaskItem>> GetById(int id)
         {
-            return View();
+            TaskItem? task = await _context.Tasks.FindAsync(id);
+
+            if (task == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(task);
         }
 
-        // POST: TaskItemController/Create
+        
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<ActionResult<TaskItem>> Create(TaskItem task)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            _context.Tasks.Add(task);
+
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetById), new { id = task.Id }, task);
+        }
+
+       
+        [HttpPut("{id}")]
+        public async Task<ActionResult> Update(int id, TaskItem task)
+        {
+            if (id != task.Id)
+            {
+                return BadRequest("Id does not match");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            _context.Entry(task).State = EntityState.Modified;
+
             try
             {
-                return RedirectToAction(nameof(Index));
+                await _context.SaveChangesAsync();
             }
-            catch
+            catch (DbUpdateConcurrencyException)
             {
-                return View();
+                bool exists = await _context.Tasks.AnyAsync(t => t.Id == id);
+
+                if (!exists)
+                {
+                    return NotFound();
+                }
+
+                throw;
             }
+
+            return NoContent();
         }
 
-        // GET: TaskItemController/Edit/5
-        public ActionResult Edit(int id)
+       
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(int id)
         {
-            return View();
-        }
+            TaskItem? task = await _context.Tasks.FindAsync(id);
 
-        // POST: TaskItemController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
+            if (task == null)
             {
-                return RedirectToAction(nameof(Index));
+                return NotFound();
             }
-            catch
-            {
-                return View();
-            }
-        }
 
-        // GET: TaskItemController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
+            _context.Tasks.Remove(task);
 
-        // POST: TaskItemController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
+<<<<<<< HEAD
 }
 >>>>>>> fe1176d (add ProjectController and TaskItemController)
+=======
+}
+>>>>>>> c2ce56e (add TaskItemController)
