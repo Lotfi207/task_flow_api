@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using TaskFlowAPI.DTOs;
 using TaskFlowAPI.Helpers;
 using TaskFlowAPI.Models;
-using TaskFLowAPI.Data;
+using TaskFlowAPI.Data;
 using static TaskFlowAPI.Models.User;
 
 namespace TaskFlowAPI.Controllers

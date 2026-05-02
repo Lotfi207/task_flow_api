@@ -3,7 +3,7 @@ using TaskFlowAPI.Models;
 using System.Text.Json;
 
 
-namespace TaskFLowAPI.Data
+namespace TaskFlowAPI.Data
 {
     public class ApiContext : DbContext
     {

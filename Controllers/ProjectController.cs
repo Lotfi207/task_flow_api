@@ -6,7 +6,7 @@ using TaskFlowAPI.Models;
 namespace TaskFlowAPI.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/projects")]
     public class ProjectController : Controller
     {
         private readonly ApiContext _context;
@@ -88,7 +88,7 @@ namespace TaskFlowAPI.Controllers
             return NoContent();
         }
 
-        // DELETE: ProjectController/Delete/5
+        
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
