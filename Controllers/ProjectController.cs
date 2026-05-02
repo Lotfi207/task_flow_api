@@ -3,13 +3,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskFlowAPI.Data;
+using TaskFlowAPI.DTOs;
 using TaskFlowAPI.Models;
 
 namespace TaskFlowAPI.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/projects")]
+    [Authorize]
     public class ProjectController : ControllerBase
     {
         private readonly ApiContext _context;
@@ -19,109 +20,114 @@ namespace TaskFlowAPI.Controllers
             _context = context;
         }
 
-        // GET: api/projects
+        // GET ALL PROJECTS (user connecté seulement)
         [HttpGet]
-        public async Task<ActionResult<List<Project>>> GetAll()
+        public async Task<ActionResult<List<ProjectDto>>> GetAll()
         {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            );
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
             var projects = await _context.Projects
                 .Where(p => p.UserId == userId)
+                .Select(p => new ProjectDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    CreationDate = p.CreationDate
+                })
                 .ToListAsync();
 
             return Ok(projects);
         }
 
-        // GET: api/projects/5
+        // GET BY ID
         [HttpGet("{id}")]
-        public async Task<ActionResult<Project>> GetById(int id)
+        public async Task<ActionResult<ProjectDto>> GetById(int id)
         {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            );
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
             var project = await _context.Projects
                 .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
 
             if (project == null)
-            {
                 return NotFound();
-            }
 
-            return Ok(project);
+            var dto = new ProjectDto
+            {
+                Id = project.Id,
+                Name = project.Name,
+                Description = project.Description,
+                CreationDate = project.CreationDate
+            };
+
+            return Ok(dto);
         }
 
-        // POST: api/projects
+        // CREATE PROJECT
         [HttpPost]
-        public async Task<ActionResult<Project>> Create(Project project)
+        public async Task<ActionResult<ProjectDto>> Create(ProjectCreateDto dto)
         {
-            if (!ModelState.IsValid)
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+            var project = new Project
             {
-                return BadRequest(ModelState);
-            }
-
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            );
-
-            project.UserId = userId;
-            project.CreationDate = DateTime.UtcNow;
+                Name = dto.Name,
+                Description = dto.Description,
+                CreationDate = DateTime.Now,
+                UserId = userId
+            };
 
             _context.Projects.Add(project);
-
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(
-                nameof(GetById),
-                new { id = project.Id },
-                project
-            );
+            return Ok(new ProjectDto
+            {
+                Id = project.Id,
+                Name = project.Name,
+                Description = project.Description,
+                CreationDate = project.CreationDate
+            });
         }
 
-        
+        // UPDATE PROJECT
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update(int id, Project updatedProject)
+        public async Task<ActionResult<ProjectDto>> Update(int id, ProjectDto dto)
         {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            );
-
-            var project = await _context.Projects
-                .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+            var project = await _context.Projects.FindAsync(id);
 
             if (project == null)
-            {
                 return NotFound();
-            }
 
-            project.Name = updatedProject.Name;
-            project.Description = updatedProject.Description;
+            project.Name = dto.Name;
+            project.Description = dto.Description;
 
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            var result = new ProjectDto
+            {
+                Id = project.Id,
+                Name = project.Name,
+                Description = project.Description,
+                CreationDate = project.CreationDate,
+               
+            };
+
+            return Ok(result);
         }
 
-        // DELETE: api/projects/5
+        // DELETE PROJECT
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var userId = int.Parse(
-                User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            );
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
             var project = await _context.Projects
                 .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
 
             if (project == null)
-            {
                 return NotFound();
-            }
 
             _context.Projects.Remove(project);
-
             await _context.SaveChangesAsync();
 
             return NoContent();
