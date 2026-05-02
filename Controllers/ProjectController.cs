@@ -7,10 +7,14 @@ namespace TaskFlowAPI.Controllers
 {
     [ApiController]
 <<<<<<< HEAD
+<<<<<<< HEAD
     [Route("[controller]")]
 =======
     [Route("api/projects")]
 >>>>>>> feature/projects
+=======
+    [Route("api/projects")]
+>>>>>>> fe1176d (add ProjectController and TaskItemController)
     public class ProjectController : Controller
     {
         private readonly ApiContext _context;
@@ -93,10 +97,14 @@ namespace TaskFlowAPI.Controllers
         }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         // DELETE: ProjectController/Delete/5
 =======
         
 >>>>>>> feature/projects
+=======
+        
+>>>>>>> fe1176d (add ProjectController and TaskItemController)
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
