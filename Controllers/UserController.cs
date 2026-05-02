@@ -59,7 +59,29 @@ namespace TaskFlowAPI.Controllers
 
             return CreatedAtAction(nameof(GetById), new { id = user.Id }, response);
         }
+        //Login
+        [HttpPost("login")]
+        public async Task<ActionResult<UserResponseDto>> Login(UserLoginDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == dto.Email);
+
+            if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+                return Unauthorized("Invalid email or password");
+
+            var response = new UserResponseDto
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                Role = user.UserRole.ToString()
+            };
+
+            return Ok(response);
+        }
 
 
         //basic crud operations
