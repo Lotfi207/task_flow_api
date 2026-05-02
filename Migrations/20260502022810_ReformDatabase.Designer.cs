@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TaskFlowAPI.Data;
+using TaskFLowAPI.Data;
 
 #nullable disable
 
 namespace TaskFlowAPI.Migrations
 {
     [DbContext(typeof(ApiContext))]
-    [Migration("20260501141705_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260502022810_ReformDatabase")]
+    partial class ReformDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,7 +43,12 @@ namespace TaskFlowAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Projects");
                 });
@@ -105,15 +110,36 @@ namespace TaskFlowAPI.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("TaskFlowAPI.Models.Project", b =>
+                {
+                    b.HasOne("TaskFlowAPI.Models.User", "User")
+                        .WithMany("Projects")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TaskFlowAPI.Models.TaskItem", b =>
                 {
                     b.HasOne("TaskFlowAPI.Models.Project", "Project")
-                        .WithMany()
+                        .WithMany("Tasks")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("TaskFlowAPI.Models.Project", b =>
+                {
+                    b.Navigation("Tasks");
+                });
+
+            modelBuilder.Entity("TaskFlowAPI.Models.User", b =>
+                {
+                    b.Navigation("Projects");
                 });
 #pragma warning restore 612, 618
         }

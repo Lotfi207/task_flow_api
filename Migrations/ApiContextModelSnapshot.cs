@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaskFLowAPI.Data;
 
-
 #nullable disable
 
 namespace TaskFlowAPI.Migrations
@@ -22,7 +21,6 @@ namespace TaskFlowAPI.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
 
             modelBuilder.Entity("TaskFlowAPI.Models.Project", b =>
                 {
@@ -80,8 +78,7 @@ namespace TaskFlowAPI.Migrations
                     b.ToTable("Tasks");
                 });
 
-            modelBuilder.Entity("TaskFLowAPI.Models.User", b =>
-
+            modelBuilder.Entity("TaskFlowAPI.Models.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
