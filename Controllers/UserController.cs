@@ -1,12 +1,11 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TaskFlowAPI.Data;
 using TaskFlowAPI.DTOs;
 using TaskFlowAPI.Helpers;
 using TaskFlowAPI.Models;
+using TaskFLowAPI.Data;
 using static TaskFlowAPI.Models.User;
 
 namespace TaskFlowAPI.Controllers
@@ -17,18 +16,16 @@ namespace TaskFlowAPI.Controllers
 
     {
         private readonly ApiContext _context;
-        private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IConfiguration _configuration;
 
-        public UserController(ApiContext context, IPasswordHasher<User> passwordHasher, IConfiguration configuration)
+        public UserController(ApiContext context, IConfiguration configuration)
         {
             _context = context;
-            _passwordHasher = passwordHasher;
             _configuration = configuration;
         }
 
         // auth operations : register and login 
-        //register
+             //register
         [HttpPost("register")]
         public async Task<ActionResult<UserResponseDto>> Register(UserCreateDto dto)
         {
@@ -42,6 +39,9 @@ namespace TaskFlowAPI.Controllers
             if (existingUser != null)
                 return BadRequest("Email already exists");
 
+            // Hash password
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+
             // Create user
             var user = new User
             {
@@ -49,9 +49,6 @@ namespace TaskFlowAPI.Controllers
                 Email = dto.Email,
                 UserRole = dto.Role
             };
-
-            // Hash password with hasher service
-            user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -180,7 +177,6 @@ namespace TaskFlowAPI.Controllers
             return Ok(response);
             }
             //DELETE USER 
-            [Authorize(Roles = "Admin")]
             [HttpDelete("{id}")]
             public async Task<ActionResult> Delete(int id)
             {

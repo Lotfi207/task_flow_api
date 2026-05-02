@@ -20,8 +20,10 @@ namespace TaskFlowAPI.Models
 
         public int ProjectId { get; set; }
 
-        public Project Project { get; set; }
+        public Project? Project { get; set; }
 
         public DateTime? DueDate { get; set; }
+
+        public List<string> Comments { get; set; } = new();
     }
 }

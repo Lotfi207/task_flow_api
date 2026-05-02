@@ -10,12 +10,15 @@ using TaskFlowAPI.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 
+
+builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -51,6 +54,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+
+app.MapControllers();
+
+
+
 
 app.Run();
 
