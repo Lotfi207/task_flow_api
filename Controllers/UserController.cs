@@ -1,6 +1,8 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskFlowAPI.DTOs;
+using TaskFlowAPI.Helpers;
 using TaskFlowAPI.Models;
 using TaskFLowAPI.Data;
 using static TaskFlowAPI.Models.User;
@@ -13,11 +15,12 @@ namespace TaskFlowAPI.Controllers
 
     {
         private readonly ApiContext _context;
+        private readonly IConfiguration _configuration;
 
-        public UserController(ApiContext context)
+        public UserController(ApiContext context, IConfiguration configuration)
         {
             _context = context;
-
+            _configuration = configuration;
         }
         // auth operations : register and login 
              //register
@@ -59,74 +62,81 @@ namespace TaskFlowAPI.Controllers
 
             return CreatedAtAction(nameof(GetById), new { id = user.Id }, response);
         }
+
         //Login
         [HttpPost("login")]
-        public async Task<ActionResult<UserResponseDto>> Login(UserLoginDto dto)
+        public async Task<ActionResult> Login(UserLoginDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == dto.Email);
 
-            if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
-                return Unauthorized("Invalid email or password");
+            if (user == null)
+                return Unauthorized("Invalid credentials");
 
-            var response = new UserResponseDto
+            var isValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
+
+            if (!isValid)
+                return Unauthorized("Invalid credentials");
+
+            var claims = new List<Claim>
             {
-                Id = user.Id,
-                Name = user.Name,
-                Email = user.Email,
-                Role = user.UserRole.ToString()
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.UserRole.ToString())
             };
 
-            return Ok(response);
+            var token = JwtHelper.CreateToken(claims, _configuration);
+
+            return Ok(new
+            {
+                token
+            });
         }
 
 
         //basic crud operations
         // GET ALL USERS
         [HttpGet]
-        public async Task<ActionResult<List<UserResponseDto>>> GetAll()
-        {
-            var users = await _context.Users
-                .Select(u => new UserResponseDto
-                {
-                    Id = u.Id,
-                    Name = u.Name,
-                    Email = u.Email,
-                    Role = u.UserRole.ToString()
-                })
-                .ToListAsync();
-
-            return Ok(users);
-        }
-
-        // GET USER BY ID
-        [HttpGet("{id}")]
-        public async Task<ActionResult<UserResponseDto>> GetById(int id)
-        {
-            var user = await _context.Users.FindAsync(id);
-
-            if (user == null)
-                return NotFound();
-
-            var response = new UserResponseDto
+            public async Task<ActionResult<List<UserResponseDto>>> GetAll()
             {
-                Id = user.Id,
-                Name = user.Name,
-                Email = user.Email,
-                Role = user.UserRole.ToString()
-            };
+                var users = await _context.Users
+                    .Select(u => new UserResponseDto
+                    {
+                        Id = u.Id,
+                        Name = u.Name,
+                        Email = u.Email,
+                        Role = u.UserRole.ToString()
+                    })
+                    .ToListAsync();
 
-            return Ok(response);
-        }
+                return Ok(users);
+            }
+
+            // GET USER BY ID
+            [HttpGet("{id}")]
+            public async Task<ActionResult<UserResponseDto>> GetById(int id)
+            {
+                var user = await _context.Users.FindAsync(id);
+
+                if (user == null)
+                    return NotFound();
+
+                var response = new UserResponseDto
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email,
+                    Role = user.UserRole.ToString()
+                };
+
+                return Ok(response);
+            }
        
 
-        // UPDATE USER
-        [HttpPut("{id}")]
-        public async Task<ActionResult<UserResponseDto>> Update(int id, UserUpdateDto dto)
-        {
+            // UPDATE USER
+            [HttpPut("{id}")]
+            public async Task<ActionResult<UserResponseDto>> Update(int id, UserUpdateDto dto)
+            {
             var user = await _context.Users.FindAsync(id);
 
             if (user == null)
@@ -163,21 +173,21 @@ namespace TaskFlowAPI.Controllers
             };
 
             return Ok(response);
-        }
-        //DELETE USER 
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id)
-        {
-            var user = await _context.Users.FindAsync(id);
+            }
+            //DELETE USER 
+            [HttpDelete("{id}")]
+            public async Task<ActionResult> Delete(int id)
+            {
+                var user = await _context.Users.FindAsync(id);
 
-            if (user == null)
-                return NotFound();
+                if (user == null)
+                    return NotFound();
 
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
 
-            return NoContent();
-        }
+                return NoContent();
+            }
 
     }
 }
