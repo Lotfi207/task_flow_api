@@ -165,7 +165,7 @@ namespace TaskFlowAPI.Controllers
             // Update password if provided
             if (!string.IsNullOrEmpty(dto.Password))
             {
-                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+                user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
             }
 
             await _context.SaveChangesAsync();
