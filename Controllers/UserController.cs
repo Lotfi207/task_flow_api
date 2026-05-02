@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskFlowAPI.DTOs;
@@ -46,7 +47,7 @@ namespace TaskFlowAPI.Controllers
                 Name = dto.Name,
                 Email = dto.Email,
                 PasswordHash = hashedPassword,
-                UserRole = Role.User
+                UserRole = dto.Role
             };
 
             _context.Users.Add(user);
@@ -96,6 +97,7 @@ namespace TaskFlowAPI.Controllers
 
         //basic crud operations
         // GET ALL USERS
+        [Authorize]
         [HttpGet]
             public async Task<ActionResult<List<UserResponseDto>>> GetAll()
             {
