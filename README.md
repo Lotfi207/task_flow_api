@@ -184,3 +184,6 @@ base route: /api/projects
                                 dotnet run 
 
 
+Associations:pseudo git <=> nom et prenom :
+- sfdhafsa <=> HAFSA SIF-EDDINE
+- Lotfi207 <=> IKRAM LOTFI
