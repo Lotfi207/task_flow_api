@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TaskFlowAPI.Data;
+using TaskFlowAPI.Middleware;
 using TaskFlowAPI.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,6 +48,8 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+//add exception handling middleware
+app.UseMiddleware<ExceptionMiddleware>();
 //Enabble authentication and authorization middleware
 app.UseAuthentication();
 app.UseAuthorization();
